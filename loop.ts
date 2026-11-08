@@ -65,7 +65,12 @@ while (true) {
   // 4. run each requested tool, append its result, go again
   for (const call of reply.tool_calls) {
     console.error(`→ ${call.function.name} ${call.function.arguments}`);
-    const result = tools[call.function.name](JSON.parse(call.function.arguments));
+    let result: string;
+    try {
+      result = tools[call.function.name](JSON.parse(call.function.arguments));
+    } catch (err) {
+      result = `error: ${(err as Error).message}`; // the model sees the error and can try again
+    }
     messages.push({ role: "tool", tool_call_id: call.id, content: result });
   }
 }
