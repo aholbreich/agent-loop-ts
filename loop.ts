@@ -11,6 +11,14 @@ const PAGE_SIZE = 1500;
 type ToolCall = { id: string; function: { name: string; arguments: string } };
 type Message = { role: string; content?: string; tool_calls?: ToolCall[]; tool_call_id?: string };
 
+// Reduce HTML to its text in code, so the model never pays for the markup.
+const toText = (html: string) =>
+  html
+    .replace(/<(style|script|svg)\b[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 // What the model sees: a name, a description and a JSON schema per tool.
 const toolSchemas = [{
   type: "function",
@@ -24,7 +32,8 @@ const toolSchemas = [{
 // What actually runs: plain code, chosen by name.
 const tools: Record<string, (args: any) => string> = {
   read_file: ({ path, page }) => {
-    const content = readFileSync(path, "utf-8");
+    const raw = readFileSync(path, "utf-8");
+    const content = path.endsWith(".html") ? toText(raw) : raw;
     const last = Math.max(1, Math.ceil(content.length / PAGE_SIZE));
     const text = content.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     const next = page < last ? `next: page=${page + 1}` : "this was the last page";
