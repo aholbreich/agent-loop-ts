@@ -1,0 +1,6 @@
+{
+  "name": "agent-loop",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" }
+}

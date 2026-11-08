@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><title>tl: a task ledger (cli) for humans and coding agents</title></head>
+<body>
+<h1>tl: a task ledger (cli) for humans and coding agents</h1>
+<p>By Alexander Holbreich. Canonical URL: https://alexander.holbreich.org/posts/2026/tl-task-ledger/</p>
+<p>Humans have memory (but we don’t like to remember too many details) - LLMs have no memory at all (it’s all session memory or supporting tools).</p>
+<p>When I work with coding agents - Preferably Pi, but sometimes Codex, Claude Code, whichever I have open today, I keep running into the same question: where does the plan live? How do I hand over work? How does an agent hand work to itself or to the next agent? Where does the context live?
+There are many angles, but I think slicing work into tasks and organizing agentic collaboration around them is the part worth getting right. That’s my intuition at the moment.</p>
+<p>That’s why I was so drawn to <a href="/posts/2026/beads-ai-native-issue-tracking">Beads</a> a few weeks ago. Beads has the right idea: work items close to the code, dependency-aware ready queues, claim/release primitives for agents. But for my use case it was more than I needed and too opinionated toward a specific “Gas Town” workflow.</p>
+<p>The basic workflow is four commands. Here is how I use it with an agent:</p>
+<p>You don’t need to, but you could define “agent collaboration” around one task via tags. I’m still experimenting with this. It could look like this:</p>
+<p><code>tl show</code> is what an agent reads before starting. <code>tl history</code> is what it reads for handoff context. <code>tl doctor</code> finds the rot that accumulates when you and an agent share a directory — broken dependencies, orphaned temp files, stale claims. <code>--fix</code> repairs what it can.</p>
+</body>
+</html>
