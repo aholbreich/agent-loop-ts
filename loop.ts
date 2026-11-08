@@ -5,6 +5,9 @@ import { readFileSync } from "node:fs";
 const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:8080/v1";
 const MODEL = process.env.MODEL ?? "local-qwen3.6-35b-a3b";
 
+const MAX_TURNS = 20;
+const PAGE_SIZE = 1500;
+
 type ToolCall = { id: string; function: { name: string; arguments: string } };
 type Message = { role: string; content?: string; tool_calls?: ToolCall[]; tool_call_id?: string };
 
@@ -21,8 +24,11 @@ const toolSchemas = [{
 // What actually runs: plain code, chosen by name.
 const tools: Record<string, (args: any) => string> = {
   read_file: ({ path, page }) => {
-    const text = readFileSync(path, "utf-8").slice((page - 1) * 1500, page * 1500);
-    return `${text}\n[page ${page}, more content available: call read_file with page=${page + 1}]`;
+    const content = readFileSync(path, "utf-8");
+    const last = Math.max(1, Math.ceil(content.length / PAGE_SIZE));
+    const text = content.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    const next = page < last ? `next: page=${page + 1}` : "this was the last page";
+    return `${text}\n[page ${page} of ${last}, ${next}]`;
   },
 };
 
@@ -32,7 +38,10 @@ const messages: Message[] = [
   { role: "user", content: process.argv[2] },
 ];
 
+let turns = 0;
 while (true) {
+  if (++turns > MAX_TURNS) throw new Error(`gave up after ${MAX_TURNS} turns`);
+
   // 1. send everything: system prompt, history, tool schemas
   const res = await fetch(`${BASE_URL}/chat/completions`, {
     method: "POST",
