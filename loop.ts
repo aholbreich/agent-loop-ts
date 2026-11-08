@@ -13,14 +13,17 @@ const toolSchemas = [{
   type: "function",
   function: {
     name: "read_file",
-    description: "Read a local text file and return its contents.",
-    parameters: { type: "object", properties: { path: { type: "string" } }, required: ["path"] },
+    description: "Read one page of a local text file.",
+    parameters: { type: "object", properties: { path: { type: "string" }, page: { type: "integer" } }, required: ["path", "page"] },
   },
 }];
 
 // What actually runs: plain code, chosen by name.
 const tools: Record<string, (args: any) => string> = {
-  read_file: ({ path }) => readFileSync(path, "utf-8"),
+  read_file: ({ path, page }) => {
+    const text = readFileSync(path, "utf-8").slice((page - 1) * 1500, page * 1500);
+    return `${text}\n[page ${page}, more content available: call read_file with page=${page + 1}]`;
+  },
 };
 
 // The whole conversation. The API remembers nothing, so we keep it.
